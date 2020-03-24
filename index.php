@@ -4,7 +4,7 @@
  * Plugin Name: WP Featured PDF
  * Plugin URI: https://github.com/constracti/wp-featured-pdf
  * Description: Set the post featured image from the thumbnail of a PDF file.
- * Version: 1.0
+ * Version: 1.0.1
  * Author: constracti
  * Author URI: https://github.com/constracti
  * Text Domain: kgr-featured-pdf
@@ -17,6 +17,9 @@ define( 'KGR_FEATURED_PDF_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KGR_FEATURED_PDF_URL', plugin_dir_url( __FILE__ ) );
 
 add_action( 'add_meta_boxes', function() {
+	$screen = get_current_screen();
+	if ( method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor() )
+		return;
 	$title = esc_html__( 'Featured PDF', 'kgr-featured-pdf' );
 	$screen = [ 'post', 'page' ];
 	$context = 'side';
@@ -34,6 +37,9 @@ function kgr_featured_pdf_metabox( WP_Post $post ) {
 add_action( 'admin_enqueue_scripts', function( string $hook ) {
 	if ( $hook !== 'post.php' && $hook !== 'post-new.php' )
 		return;
+	$screen = get_current_screen();
+	if ( method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor() )
+		return;
 	$plugin_data = get_plugin_data( __FILE__ );
 	wp_enqueue_media();
 	wp_register_script( 'kgr-featured-pdf-metabox', KGR_FEATURED_PDF_URL . 'metabox.js', [ 'jquery' ], $plugin_data['Version'] );
@@ -46,13 +52,8 @@ add_action( 'admin_enqueue_scripts', function( string $hook ) {
 add_action( 'save_post', function( int $post_ID, WP_Post $post, bool $update ) {
 	if ( $post->post_type !== 'post' && $post->post_type !== 'page' )
 		return;
-	require_once( ABSPATH . 'wp-admin/includes/image.php' );
-	if ( !array_key_exists( '_thumbnail_id', $_POST ) )
-		wp_die( '_thumbnail_id: not defined' );
-	if ( intval( $_POST['_thumbnail_id'] ) !== -1 )
-		return;
 	if ( !array_key_exists( 'kgr_featured_pdf', $_POST ) )
-		wp_die( 'kgr_featured_pdf: not defined' );
+		return;
 	$pdf = $_POST['kgr_featured_pdf'];
 	if ( $pdf === '' )
 		return;
@@ -107,6 +108,7 @@ add_action( 'save_post', function( int $post_ID, WP_Post $post, bool $update ) {
 	$attach_id = wp_insert_attachment( $attachment, $dest, $post->ID );
 	if ( !$attach_id )
 		wp_die( 'wp_insert_attachment: failure' );
+	require_once( ABSPATH . 'wp-admin/includes/image.php' );
 	$attach_data = wp_generate_attachment_metadata( $attach_id, $dest );
 	wp_update_attachment_metadata( $attach_id, $attach_data );
 	update_post_meta( $attach_id, '_wp_attachment_image_alt', $name );

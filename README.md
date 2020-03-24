@@ -13,5 +13,6 @@ A copy of the full-sized PDF thumbnail is set as the post's featured image.
 
 ## Notes
 
+* Metabox is not present in block editor.
 * Only PDFs attached to the current post are listed.
 * PDF thumbnails must be generated automatically.
