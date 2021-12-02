@@ -1,12 +1,16 @@
 <?php
 
 /*
- * Plugin Name: WP Featured PDF
+ * Plugin Name: KGR Featured PDF
  * Plugin URI: https://github.com/constracti/kgr-featured-pdf
  * Description: Set the post featured image from the thumbnail of a PDF file.
  * Version: 1.0.2
+ * Requires at least: 4.7.0
+ * Requires PHP: 7.0
  * Author: constracti
  * Author URI: https://github.com/constracti
+ * License: GPLv3
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: kgr-featured-pdf
  */
 
@@ -15,6 +19,11 @@ if ( !defined( 'ABSPATH' ) )
 
 define( 'KGR_FEATURED_PDF_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KGR_FEATURED_PDF_URL', plugin_dir_url( __FILE__ ) );
+
+function kgr_featured_pdf_version(): string {
+	$plugin_data = get_plugin_data( __FILE__ );
+	return $plugin_data['Version'];
+}
 
 add_action( 'add_meta_boxes', function(): void {
 	$screen = get_current_screen();
@@ -40,9 +49,8 @@ add_action( 'admin_enqueue_scripts', function( string $hook_suffix ): void {
 	$screen = get_current_screen();
 	if ( method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor() )
 		return;
-	$plugin_data = get_plugin_data( __FILE__ );
 	wp_enqueue_media();
-	wp_register_script( 'kgr-featured-pdf-metabox', KGR_FEATURED_PDF_URL . 'metabox.js', [ 'jquery' ], $plugin_data['Version'] );
+	wp_register_script( 'kgr-featured-pdf-metabox', KGR_FEATURED_PDF_URL . 'metabox.js', [ 'jquery' ], kgr_featured_pdf_version() );
 	wp_localize_script( 'kgr-featured-pdf-metabox', 'kgr_featured_pdf', [
 		'frame_title' => esc_html__( 'Featured PDF', 'kgr-featured-pdf' ),
 	] );
