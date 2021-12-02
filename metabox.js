@@ -35,7 +35,6 @@ jQuery( function() {
 		frame.on('escape', function() {
 			jQuery('#kgr-featured-pdf-metabox-id').val('');
 			jQuery('#kgr-featured-pdf-metabox-img').html('');
-			console.log('escape');
 		});
 		frame.open();
 	});

@@ -2,9 +2,9 @@
 
 /*
  * Plugin Name: WP Featured PDF
- * Plugin URI: https://github.com/constracti/wp-featured-pdf
+ * Plugin URI: https://github.com/constracti/kgr-featured-pdf
  * Description: Set the post featured image from the thumbnail of a PDF file.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: constracti
  * Author URI: https://github.com/constracti
  * Text Domain: kgr-featured-pdf
@@ -16,17 +16,17 @@ if ( !defined( 'ABSPATH' ) )
 define( 'KGR_FEATURED_PDF_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KGR_FEATURED_PDF_URL', plugin_dir_url( __FILE__ ) );
 
-add_action( 'add_meta_boxes', function() {
+add_action( 'add_meta_boxes', function(): void {
 	$screen = get_current_screen();
 	if ( method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor() )
 		return;
 	$title = esc_html__( 'Featured PDF', 'kgr-featured-pdf' );
-	$screen = [ 'post', 'page' ];
+	$screen = [ 'post', 'page', ];
 	$context = 'side';
 	add_meta_box( 'kgr-featured-pdf', $title, 'kgr_featured_pdf_metabox', $screen, $context );
 } );
 
-function kgr_featured_pdf_metabox( WP_Post $post ) {
+function kgr_featured_pdf_metabox( WP_Post $post ): void {
 ?>
 <input type="hidden" id="kgr-featured-pdf-metabox-id" name="kgr_featured_pdf" />
 <div id="kgr-featured-pdf-metabox-img"></div>
@@ -34,8 +34,8 @@ function kgr_featured_pdf_metabox( WP_Post $post ) {
 <?php
 }
 
-add_action( 'admin_enqueue_scripts', function( string $hook ) {
-	if ( $hook !== 'post.php' && $hook !== 'post-new.php' )
+add_action( 'admin_enqueue_scripts', function( string $hook_suffix ): void {
+	if ( $hook_suffix !== 'post.php' && $hook_suffix !== 'post-new.php' )
 		return;
 	$screen = get_current_screen();
 	if ( method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor() )
@@ -49,7 +49,7 @@ add_action( 'admin_enqueue_scripts', function( string $hook ) {
 	wp_enqueue_script( 'kgr-featured-pdf-metabox' );
 } );
 
-add_action( 'save_post', function( int $post_ID, WP_Post $post, bool $update ) {
+add_action( 'save_post', function( int $post_ID, WP_Post $post, bool $update ): void {
 	if ( $post->post_type !== 'post' && $post->post_type !== 'page' )
 		return;
 	if ( !array_key_exists( 'kgr_featured_pdf', $_POST ) )

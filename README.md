@@ -1,6 +1,6 @@
 # KGR Featured PDF
 
-WordPress plugin: Set the post featured image from the thumbnail of a PDF file.
+WordPress Plugin: Set the post featured image from the thumbnail of a PDF file.
 
 A copy of the full-sized PDF thumbnail is set as the post's featured image.
 
