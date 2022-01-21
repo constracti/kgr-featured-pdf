@@ -4,7 +4,7 @@
  * Plugin Name: KGR Featured PDF
  * Plugin URI: https://github.com/constracti/kgr-featured-pdf
  * Description: Set the post featured image from the thumbnail of a PDF file.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Requires at least: 4.7.0
  * Requires PHP: 7.0
  * Author: constracti
@@ -17,31 +17,37 @@
 if ( !defined( 'ABSPATH' ) )
 	exit;
 
-define( 'KGR_FEATURED_PDF_DIR', plugin_dir_path( __FILE__ ) );
-define( 'KGR_FEATURED_PDF_URL', plugin_dir_url( __FILE__ ) );
+final class KGR_Featured_PDF {
 
-function kgr_featured_pdf_version(): string {
-	$plugin_data = get_plugin_data( __FILE__ );
-	return $plugin_data['Version'];
+	public static function dir( string $dir ): string {
+		return plugin_dir_path( __FILE__ ) . $dir;
+	}
+
+	public static function url( string $url ): string {
+		return plugin_dir_url( __FILE__ ) . $url;
+	}
+
+	public static function version(): string {
+		$plugin_data = get_plugin_data( __FILE__ );
+		return $plugin_data['Version'];
+	}
 }
 
-add_action( 'add_meta_boxes', function(): void {
+add_action( 'add_meta_boxes', function( string $post_type ): void {
+	if ( !in_array( $post_type, [ 'page', 'post' ], TRUE ) )
+		return;
 	$screen = get_current_screen();
 	if ( method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor() )
 		return;
 	$title = esc_html__( 'Featured PDF', 'kgr-featured-pdf' );
-	$screen = [ 'post', 'page', ];
-	$context = 'side';
-	add_meta_box( 'kgr-featured-pdf', $title, 'kgr_featured_pdf_metabox', $screen, $context );
-} );
-
-function kgr_featured_pdf_metabox( WP_Post $post ): void {
+	add_meta_box( 'kgr-featured-pdf', $title, function( WP_Post $post ): void {
 ?>
 <input type="hidden" id="kgr-featured-pdf-metabox-id" name="kgr_featured_pdf" />
 <div id="kgr-featured-pdf-metabox-img"></div>
 <div><a id="kgr-featured-pdf-metabox-show" href="#"><?= esc_html__( 'Set featured PDF', 'kgr-featured-pdf' ) ?></a></div>
 <?php
-}
+	}, NULL, 'side' );
+} );
 
 add_action( 'admin_enqueue_scripts', function( string $hook_suffix ): void {
 	if ( $hook_suffix !== 'post.php' && $hook_suffix !== 'post-new.php' )
@@ -50,7 +56,7 @@ add_action( 'admin_enqueue_scripts', function( string $hook_suffix ): void {
 	if ( method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor() )
 		return;
 	wp_enqueue_media();
-	wp_register_script( 'kgr-featured-pdf-metabox', KGR_FEATURED_PDF_URL . 'metabox.js', [ 'jquery' ], kgr_featured_pdf_version() );
+	wp_register_script( 'kgr-featured-pdf-metabox', KGR_Featured_PDF::url( 'metabox.js' ), [ 'jquery' ], KGR_Featured_PDF::version() );
 	wp_localize_script( 'kgr-featured-pdf-metabox', 'kgr_featured_pdf', [
 		'frame_title' => esc_html__( 'Featured PDF', 'kgr-featured-pdf' ),
 	] );
